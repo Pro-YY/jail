@@ -45,7 +45,7 @@ void jail_conf_free(jail_conf_t *conf) {
 }
 
 void jail_conf_dump(jail_conf_t *conf) {
-    if (!LOG_VERBOSE) return;
+    if (LOG_VERBOSE < LOG_LEVEL_DEBUG) return;
     // TODO snprintf with log_debug
     fprintf(stderr, "[CONF DUMP BEGIN]\n");
     fprintf(stderr, "program: %s ", conf->program);

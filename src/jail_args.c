@@ -86,7 +86,7 @@ jail_args_t jail_args_parse(int argc, char **argv) {
 }
 
 void jail_args_dump(jail_args_t *ja) {
-    if (!LOG_VERBOSE) return;
+    if (LOG_VERBOSE < LOG_LEVEL_DEBUG) return;
     // TODO snprintf with log_debug
     fprintf(stderr, "[ARGS DUMP BEGIN]\n");
     fprintf(stderr, "verbose: %d\n", ja->verbose);

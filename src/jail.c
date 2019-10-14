@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
 
     //jail_args_dump(&args);
     log_info("Hello, Jail!");
+    log_debug("Hello, Jail Debug!");
 
     jail_config = jail_conf_init(&args);
     if (!jail_config) {

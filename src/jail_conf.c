@@ -4,8 +4,6 @@
 #include "jail.h"
 
 
-#define DEFAULT_MOUNT_DIR_BASE "."
-
 #define MOUNT_DIR_SIZE 1024
 
 
@@ -17,15 +15,26 @@ jail_conf_t *jail_conf_init(jail_args_t *args) {
         log_errno("malloc failed");
         return NULL;
     }
+    memset(conf, 0, sizeof(jail_conf_t));
+
+    // from args
     conf->program = args->program;
     conf->args = args->args;
     conf->name = args->name;
+    conf->root = args->root;
+    conf->writable = args->writable;
+
+    // internal states
+    conf->pid = -1;
+
+    conf->efd = -1;
+
     conf->mount_dir = malloc(MOUNT_DIR_SIZE);
     if (!conf->mount_dir) {
         log_errno("malloc failed");
         return NULL;
     }
-    snprintf(conf->mount_dir, MOUNT_DIR_SIZE, "%s/%s", DEFAULT_MOUNT_DIR_BASE, conf->name);
+    snprintf(conf->mount_dir, MOUNT_DIR_SIZE, "%s/%s", args->base, conf->name);
 
     return conf;
 }
@@ -45,7 +54,10 @@ void jail_conf_dump(jail_conf_t *conf) {
     }
     fprintf(stderr, "\n");
     fprintf(stderr, "name: %s\n", conf->name);
-    fprintf(stderr, "mount_dir: %s\n", conf->mount_dir);
+    fprintf(stderr, "pid: %d\n", conf->pid);
     fprintf(stderr, "efd: %d\n", conf->efd);
+    fprintf(stderr, "mount_dir: %s\n", conf->mount_dir);
+    fprintf(stderr, "root: %s\n", conf->root);
+    fprintf(stderr, "writable: %d\n", conf->writable);
     fprintf(stderr, "[CONF DUMP END]\n");
 }

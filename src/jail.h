@@ -50,6 +50,9 @@ typedef struct {
     char   *hint;
     char   *program;    // executable pragram to be run
     char  **args;       // and its args
+    char   *base;
+    char   *root;
+    int     writable;
 } jail_args_t;
 
 
@@ -64,13 +67,19 @@ typedef struct {
     char   *program;
     char  **args;
     char   *name;
+    pid_t   pid;
     int     efd;
     char   *mount_dir;
+    char   *root;
+    int     writable;
 } jail_conf_t;
 
 
 jail_conf_t *jail_conf_init(jail_args_t *args);
 void jail_conf_free(jail_conf_t *conf);
 void jail_conf_dump(jail_conf_t *conf);
+
+int spawn_jail(jail_conf_t *conf);
+int await_jail(jail_conf_t *conf);
 
 #endif /* _JAIL_H_INCLUDED_ */

@@ -87,6 +87,68 @@ int mount_rootfs(jail_conf_t *conf) {
 }
 
 
+/*
+ * networks
+ */
+
+static int setup_network(jail_conf_t *conf) {
+    /*
+     * host should enable ip forward and set nat rules first, i.e.
+     * 1. sysctl -w net.ipv4.ip_forward=1
+     * 2. iptables -t nat -A POSTROUTING -s 172.16.0.0/12 -j MASQUERADE
+     */
+    int ret = -1;
+    char cmd[256] =  {0};
+
+    char address[] = "172.16.0.1/12";
+
+    sprintf(cmd, "ip link add veth-%s type veth peer name veth0 netns %d", conf->name, conf->pid);
+    ret = system(cmd);
+    if (ret) { log_error("error add link"); return -1; }
+
+    sprintf(cmd, "ip link set veth-%s up", conf->name);
+    ret = system(cmd);
+    if (ret) { log_error("error set link up"); return -1; }
+
+    sprintf(cmd, "ip address add %s dev veth-%s", address, conf->name);
+    log_debug("%s", cmd);
+    ret = system(cmd);
+    if (ret) { log_error("error add address"); return -1; }
+
+    return 0;
+}
+
+
+static int init_jail_network(jail_conf_t *conf) {
+    int ret = -1;
+    char cmd[256] =  {0};
+    char address[256] = {0};
+    char gateway[] = "172.16.0.1";
+
+    snprintf(address, 256, "%s", conf->ip_address);
+    strncat(address, "/12", 256);
+
+    ret = system("ip link set lo up");
+    if (ret) { log_error("error set lo up"); return -1; }
+
+    ret = system("ip link set veth0 up");
+    if (ret) { log_error("error set veth0 up"); return -1; }
+
+    sprintf(cmd, "ip address add %s dev veth0", address);
+    ret = system(cmd);
+    if (ret) { log_error("error add address"); return -1; }
+
+    sprintf(cmd, "ip route add default via %s", gateway);
+    ret = system(cmd);
+    if (ret) { log_error("error add address"); return -1; }
+
+    return 0;
+}
+
+
+/*
+ * jail process as child routine
+ */
 #define MAX_ARGV 1024
 #define HOSTNAME_PREFIX "jail-"
 #define MAX_HOSTNAME 256
@@ -116,6 +178,14 @@ static int jail_process(void *args) {
 
     log_debug("waiting parent setting up...");
     await_setup_event(conf->efd);
+    log_debug("parent setup complete.");
+
+    // init network
+    ret = init_jail_network(conf);
+    if (ret != 0) {
+        log_error("error init jail network");
+        return ret;
+    }
 
     // mount rootfs
     ret = mount_rootfs(conf);
@@ -182,11 +252,18 @@ int spawn_jail(jail_conf_t *conf) {
     conf->pid = ret;
 
     // setup something here, like network/uidmap
+    ret = setup_network(conf);
+    if (ret < 0) {
+        log_error("error setup network, killing jail process");
+        kill(conf->pid, SIGKILL);
+        return -1;
+    }
 
     ret = notify_setup_event(conf->efd);
     if (ret < 0) {
         log_error("error notify, killing jail process");
         kill(conf->pid, SIGKILL);
+        return -1;
     }
 
     return 0;

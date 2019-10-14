@@ -18,6 +18,7 @@ static struct argp_option options[] = {
   { "writable", 'w', 0, 0, "Make rootfs writable mount", 0 },
   { "verbose", 'v', 0, 0, "Make the operation more talkative", 0 },
   { "hint", -1, "STRING", OPTION_HIDDEN, "", 0 },
+  { "ip", 200, "ADDRESS", 0, "Assign ip address, within 172.16.0.2/16", 0 },
   { 0 }
 };
 
@@ -39,6 +40,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
             break;
         case 'v':
             arguments->verbose += 1;
+            break;
+        case 200:
+            arguments->ip_address = arg;
             break;
         case -1:
             arguments->hint = arg;
@@ -64,12 +68,13 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 static struct argp argp = { options, parse_opt, args_doc, doc };
 
 static int jail_args_init(jail_args_t *args) {
-    args->name = "example-001";
+    args->name = "demo-1"; // length should be no more than 10
     args->verbose = 0;
     args->hint = NULL;
     args->base = ".";
     args->root = "/";
     args->writable = 0;
+    args->ip_address = "172.16.0.2";
 
     args->program = NULL;
     args->args = NULL;
@@ -100,5 +105,6 @@ void jail_args_dump(jail_args_t *ja) {
     fprintf(stderr, "base: %s\n", ja->base);
     fprintf(stderr, "root: %s\n", ja->root);
     fprintf(stderr, "writable: %d\n", ja->writable);
+    fprintf(stderr, "ip_address: %s\n", ja->ip_address);
     fprintf(stderr, "[ARGS DUMP END]\n");
 }

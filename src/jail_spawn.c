@@ -220,8 +220,8 @@ clean:
     if (jail_stack) free(jail_stack);
 
     log_debug("remove mount dir: %s ...", conf->mount_dir);
-    rmdir(conf->mount_dir);
-    if (ret) log_error("rmdir failed: %s", conf->mount_dir);
+    ret = rmdir(conf->mount_dir);
+    if (ret) log_errno("rmdir failed: %s", conf->mount_dir);
     log_debug("done.");
 
     return ret;

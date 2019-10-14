@@ -124,7 +124,7 @@ static int jail_process(void *args) {
         return ret;
     }
 
-    log_debug("-------- Jail Starting Exec --------");
+    log_debug("-------- Jail Start --------");
     ret = execve(jail_argv[0], jail_argv, NULL);
     if (ret != 0) {
         log_error("exec error!");
@@ -198,6 +198,7 @@ int await_jail(jail_conf_t *conf) {
     int wstatus = -1;
 
     ret = waitpid(conf->pid, &wstatus, 0);
+    log_debug("-------- Jail Exit ---------");
     if (ret < 0) {
         log_error("error wait jail");
         goto clean;

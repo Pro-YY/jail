@@ -172,7 +172,7 @@ static int jail_process(void *args) {
     strncat(hostname, conf->name, MAX_HOSTNAME);
     ret = sethostname(hostname, strlen(hostname));
     if (ret != 0) {
-        log_error("error sethostname");
+        log_errno("error sethostname");
         return ret;
     }
 
@@ -197,7 +197,7 @@ static int jail_process(void *args) {
     log_debug("-------- Jail Start --------");
     ret = execve(jail_argv[0], jail_argv, NULL);
     if (ret != 0) {
-        log_error("exec error!");
+        log_errno("exec error!");
         return -1;
     }
     // can never reach here because of exec

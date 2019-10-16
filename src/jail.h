@@ -33,7 +33,9 @@ do {                                                                \
 #define log_info(...)                                               \
 do {                                                                \
     if (!(LOG_VERBOSE >= LOG_LEVEL_INFO)) break;                    \
-    fprintf(stdout, "[INFO]"__VA_ARGS__"\n");                       \
+    fprintf(stdout, "[INFO] ");                                     \
+    fprintf(stdout, __VA_ARGS__);                                   \
+    fprintf(stdout, "\n");                                          \
 } while (0)
 
 #define log_debug(...)                                              \

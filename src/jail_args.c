@@ -15,6 +15,7 @@ static struct argp_option options[] = {
   { "name", 'n', "STRING", 0, "Jail name", 0 },
   { "base", 'b', "STRING", 0, "Mount base dir, default to '.'", 0 },
   { "root", 'r', "STRING", 0, "Rootfs, default to '/'", 0 },
+  { "detach", 'd', 0, 0, "Detach process as deaemon", 0 },
   { "writable", 'w', 0, 0, "Make rootfs writable mount", 0 },
   { "verbose", 'v', 0, 0, "Make the operation more talkative", 0 },
   { "hint", -1, "STRING", OPTION_HIDDEN, "", 0 },
@@ -34,6 +35,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
             break;
         case 'r':
             arguments->root = arg;
+            break;
+        case 'd':
+            arguments->detach = 1;
             break;
         case 'w':
             arguments->writable = 1;
@@ -104,6 +108,7 @@ void jail_args_dump(jail_args_t *ja) {
     fprintf(stderr, "name: %s\n", ja->name);
     fprintf(stderr, "base: %s\n", ja->base);
     fprintf(stderr, "root: %s\n", ja->root);
+    fprintf(stderr, "detach: %d\n", ja->detach);
     fprintf(stderr, "writable: %d\n", ja->writable);
     fprintf(stderr, "ip_address: %s\n", ja->ip_address);
     fprintf(stderr, "[ARGS DUMP END]\n");

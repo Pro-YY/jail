@@ -31,8 +31,8 @@ int main(int argc, char *argv[]) {
     jail_args_t args = jail_args_parse(argc, argv);
     LOG_VERBOSE = args.verbose;
 
-    //jail_args_dump(&args);
     log_debug("Hello, Jail!");
+    //jail_args_dump(&args);
 
     jail_config = jail_conf_init(&args);
     if (!jail_config) {
@@ -58,4 +58,3 @@ error:
 
     return EXIT_FAILURE;
 }
-

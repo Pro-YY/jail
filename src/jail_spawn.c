@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 #include <unistd.h>
 #include <sched.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/eventfd.h>
@@ -207,6 +208,35 @@ static int jail_process(void *args) {
 /*
  * main process
  */
+static int detach() {
+    int ret = -1;
+    int fd;
+    int maxfd = -1;
+
+    maxfd = sysconf(_SC_OPEN_MAX);
+
+    log_debug("detaching jail");
+    ret = fork();
+    if (ret) _exit(EXIT_SUCCESS);   // parent exit, child proceed
+    ret = setsid();     // leader of new session, 0 for success
+    if (ret < 0) { log_errno("error setsid"); return -1; }
+    ret = fork();
+    if (ret) _exit(EXIT_SUCCESS);
+
+    for (fd = 0; fd < maxfd; fd++) close(fd);
+    fd = open("/dev/null", O_RDWR);
+    if (fd < 0) { log_errno("error open /dev/null as stdin"); return -1; }
+
+    fd = dup2(STDIN_FILENO, STDOUT_FILENO);
+    if (fd < 0) { log_errno("error dup stdout"); return -1; }
+
+    fd = dup2(STDIN_FILENO, STDERR_FILENO);
+    if (fd < 0) { log_errno("error dup stderr"); return -1; }
+
+    return ret;
+}
+
+
 static int notify_setup_event(int efd) {
     ssize_t ret = write(efd, &(uint64_t){1}, sizeof(uint64_t));
     if (ret != sizeof(uint64_t)) {
@@ -225,6 +255,14 @@ const int stack_size = 1<<16;
 int spawn_jail(jail_conf_t *conf) {
     int ret = -1;
     int flags = 0;
+
+    if (conf->detach) {
+        ret = detach();
+        if (ret < 0) {
+            log_error("detach jail error!");
+            return -1;
+        }
+    }
 
     conf->efd = eventfd(0, 0);
     if (conf->efd < 0) {
@@ -309,7 +347,7 @@ clean:
 
 
 int clean_jail(jail_conf_t *conf) {
-    int ret = 0;
+    int ret = -1;
 
     log_debug("-------- Jail Exit ---------");
 

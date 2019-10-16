@@ -84,13 +84,17 @@ typedef struct {
     char   *ip_address;
 } jail_conf_t;
 
-jail_conf_t *jail_config; // global config
+
+extern jail_conf_t *jail_config; // global config
+
 
 jail_conf_t *jail_conf_init(jail_args_t *args);
 void jail_conf_free(jail_conf_t *conf);
 void jail_conf_dump(jail_conf_t *conf);
 
+
 int spawn_jail(jail_conf_t *conf);
 int clean_jail(jail_conf_t *conf);
+
 
 #endif /* _JAIL_H_INCLUDED_ */

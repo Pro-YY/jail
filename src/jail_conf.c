@@ -7,6 +7,9 @@
 #define MOUNT_DIR_SIZE 1024
 
 
+jail_conf_t *jail_config; // global config
+
+
 jail_conf_t *jail_conf_init(jail_args_t *args) {
     jail_conf_t *conf;
 

@@ -270,6 +270,8 @@ int spawn_jail(jail_conf_t *conf) {
 }
 
 
+/*
+ *  no need to wait child jail process, just handle signal SIGCHLD
 int await_jail(jail_conf_t *conf) {
     int ret = 0;
     int wstatus = -1;
@@ -292,6 +294,25 @@ int await_jail(jail_conf_t *conf) {
     }
 
 clean:
+    log_debug("clean jail process resource...");
+    close(conf->efd);
+    if (jail_stack) free(jail_stack);
+
+    log_debug("remove mount dir: %s ...", conf->mount_dir);
+    ret = rmdir(conf->mount_dir);
+    if (ret) log_errno("rmdir failed: %s", conf->mount_dir);
+    log_debug("done.");
+
+    return ret;
+}
+*/
+
+
+int clean_jail(jail_conf_t *conf) {
+    int ret = 0;
+
+    log_debug("-------- Jail Exit ---------");
+
     log_debug("clean jail process resource...");
     close(conf->efd);
     if (jail_stack) free(jail_stack);

@@ -19,7 +19,7 @@ static struct argp_option options[] = {
   { "writable", 'w', 0, 0, "Make rootfs writable mount", 0 },
   { "verbose", 'v', 0, 0, "Make the operation more talkative", 0 },
   { "hint", -1, "STRING", OPTION_HIDDEN, "", 0 },
-  { "ip", 200, "ADDRESS", 0, "Assign ip address, within 172.16.0.2/16", 0 },
+  { "ip", 200, "ADDRESS", 0, "Assign ip address, within 172.17.0.1/16", 0 },
   { 0 }
 };
 

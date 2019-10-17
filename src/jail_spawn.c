@@ -91,18 +91,38 @@ int mount_rootfs(jail_conf_t *conf) {
 /*
  * networks
  */
-
 static int setup_network(jail_conf_t *conf) {
     /*
      * host should enable ip forward and set nat rules first, i.e.
      * 1. sysctl -w net.ipv4.ip_forward=1
-     * 2. iptables -t nat -A POSTROUTING -s 172.16.0.0/12 -j MASQUERADE
+     * 2. iptables -t nat -A POSTROUTING -s 172.17.0.0/16 -j MASQUERADE
      */
     int ret = -1;
     char cmd[256] =  {0};
 
-    char address[] = "172.16.0.1/12";
+    const char bridge[] = "jail0";
 
+    /*
+     * prepare host
+     */
+    sprintf(cmd, "ip link | grep %s", bridge);
+    ret = system(cmd);
+    if (!ret) { goto create_veth; } // bridge already exists
+    else { log_debug("bridge not exists yet, creating"); }
+
+    sprintf(cmd, "ip link add name %s type bridge", bridge);
+    ret = system(cmd);
+    if (ret) { log_error("error add bridge"); goto error; }
+
+    sprintf(cmd, "ip a add 172.17.255.254/16 brd + dev %s", bridge);
+    ret = system(cmd);
+    if (ret) { log_error("error set bridge address"); goto error; }
+
+    sprintf(cmd, "ip link set %s up", bridge);
+    ret = system(cmd);
+    if (ret) { log_error("error set bridge up"); goto error; }
+
+create_veth:
     sprintf(cmd, "ip link add veth-%s type veth peer name veth0 netns %d", conf->name, conf->pid);
     ret = system(cmd);
     if (ret) { log_error("error add link"); return -1; }
@@ -111,12 +131,19 @@ static int setup_network(jail_conf_t *conf) {
     ret = system(cmd);
     if (ret) { log_error("error set link up"); return -1; }
 
-    sprintf(cmd, "ip address add %s dev veth-%s", address, conf->name);
-    log_debug("%s", cmd);
+    sprintf(cmd, "ip link set veth-%s master %s", conf->name, bridge);
     ret = system(cmd);
-    if (ret) { log_error("error add address"); return -1; }
+    if (ret) { log_error("error set bridge master"); return -1; }
 
     return 0;
+
+error:
+    log_error("delete %s bridge", bridge);
+    sprintf(cmd, "ip link del %s", bridge);
+    ret = system(cmd);
+    if (ret) { log_error(" error delete bridge"); }
+
+    return -1;
 }
 
 
@@ -124,10 +151,10 @@ static int init_jail_network(jail_conf_t *conf) {
     int ret = -1;
     char cmd[256] =  {0};
     char address[256] = {0};
-    char gateway[] = "172.16.0.1";
+    char gateway[] = "172.17.255.254";
 
     snprintf(address, 256, "%s", conf->ip_address);
-    strncat(address, "/12", 256);
+    strncat(address, "/16", 256);
 
     ret = system("ip link set lo up");
     if (ret) { log_error("error set lo up"); return -1; }
@@ -358,7 +385,7 @@ int clean_jail(jail_conf_t *conf) {
     log_debug("remove mount dir: %s ...", conf->mount_dir);
     ret = rmdir(conf->mount_dir);
     if (ret) log_errno("rmdir failed: %s", conf->mount_dir);
-    log_debug("done.");
+    log_debug("cleaning completed.");
 
     return ret;
 }

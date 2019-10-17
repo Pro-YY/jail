@@ -16,8 +16,13 @@ static void signal_handler(int signal) {
         log_info("got SIGTERM, clean jail");
         kill(jail_config->pid, SIGKILL);
         break;
+    case SIGINT:
+        log_info("got SIGINT, clean jail");
+        kill(jail_config->pid, SIGKILL);
+        break;
     default:
-        log_info("got unknown signal: %d, clean and exit", signal);
+        // should not be here
+        log_error("got unexpected signal: %d, clean and exit", signal);
         clean_jail(jail_config);
         jail_conf_free(jail_config);
         exit(EXIT_SUCCESS);
@@ -47,7 +52,9 @@ int main(int argc, char *argv[]) {
     jail_conf_dump(jail_config);
 
     signal(SIGCHLD, signal_handler);
-    signal(SIGTERM, signal_handler);
+    signal(SIGTERM, signal_handler);    // default kill
+    signal(SIGINT, signal_handler);     // Ctrl+C, default term
+    signal(SIGQUIT, signal_handler);    // Ctrl+\, default core
 
     // await events
     for (;;);

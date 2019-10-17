@@ -34,7 +34,7 @@ static int await_setup_event(int efd)
 int mount_rootfs(jail_conf_t *conf) {
     int ret = -1;
 
-    log_debug("remounting everything as slave...");
+    log_debug("remount everything as slave...");
     ret = mount(NULL, "/", NULL, MS_SLAVE | MS_REC, NULL);
     if (ret) { log_errno("error remount as slave"); return -1; }
 
@@ -54,7 +54,7 @@ int mount_rootfs(jail_conf_t *conf) {
     ret = mkdir(inner_mount_dir, 0);
     if (ret) { log_error("error make inner mount dir"); return -1; }
 
-    log_debug("pivoting root...");
+    log_debug("pivot root...");
     ret = syscall(SYS_pivot_root, conf->mount_dir, inner_mount_dir);
     if (ret) { log_error("error pivot root"); return -1; }
 
@@ -62,7 +62,7 @@ int mount_rootfs(jail_conf_t *conf) {
     ret = chdir("/");
     if (ret) { log_error("error chdir to new root"); return -1; }
 
-    log_debug("mounting proc...");
+    log_debug("mount proc...");
     ret = mount("proc", "/proc", "proc", MS_RDONLY, NULL);
     if (ret) { log_error("error mount proc"); return -1; }
 

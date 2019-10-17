@@ -35,8 +35,6 @@ int main(int argc, char *argv[]) {
 
     jail_args_t args = jail_args_parse(argc, argv);
     LOG_VERBOSE = args.verbose;
-
-    log_debug("Hello, Jail!");
     //jail_args_dump(&args);
 
     jail_config = jail_conf_init(&args);
@@ -45,11 +43,16 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    if (jail_config->detach) {
+        ret = daemonize();
+        if (ret < 0) goto error;
+    }
+
     // start jail spawning
     ret = spawn_jail(jail_config);
     if (ret < 0) goto error;
     log_debug("jail spawned");
-    jail_conf_dump(jail_config);
+    //jail_conf_dump(jail_config);
 
     signal(SIGCHLD, signal_handler);
     signal(SIGTERM, signal_handler);    // default kill

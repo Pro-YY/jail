@@ -77,6 +77,7 @@ static int jail_args_init(jail_args_t *args) {
     args->hint = NULL;
     args->base = ".";
     args->root = "/";
+    args->detach = 0;
     args->writable = 0;
     args->ip_address = "172.16.0.2";
 

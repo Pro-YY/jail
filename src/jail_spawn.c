@@ -105,7 +105,7 @@ static int setup_network(jail_conf_t *conf) {
     /*
      * prepare host
      */
-    sprintf(cmd, "ip link | grep %s", bridge);
+    sprintf(cmd, "ip link | grep %s 1>/dev/null 2>&1", bridge);
     ret = system(cmd);
     if (!ret) { goto create_veth; } // bridge already exists
     else { log_debug("bridge not exists yet, creating"); }
@@ -235,14 +235,13 @@ static int jail_process(void *args) {
 /*
  * main process
  */
-static int detach() {
+int daemonize() {
     int ret = -1;
     int fd;
     int maxfd = -1;
 
     maxfd = sysconf(_SC_OPEN_MAX);
 
-    log_debug("detaching jail");
     ret = fork();
     if (ret) _exit(EXIT_SUCCESS);   // parent exit, child proceed
     ret = setsid();     // leader of new session, 0 for success
@@ -282,14 +281,6 @@ const int stack_size = 1<<16;
 int spawn_jail(jail_conf_t *conf) {
     int ret = -1;
     int flags = 0;
-
-    if (conf->detach) {
-        ret = detach();
-        if (ret < 0) {
-            log_error("detach jail error!");
-            return -1;
-        }
-    }
 
     conf->efd = eventfd(0, 0);
     if (conf->efd < 0) {

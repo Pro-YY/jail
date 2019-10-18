@@ -97,5 +97,6 @@ int daemonize();
 int spawn_jail(jail_conf_t *conf);
 int clean_jail(jail_conf_t *conf);
 
+void jail_loop();
 
 #endif /* _JAIL_H_INCLUDED_ */

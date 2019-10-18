@@ -1,33 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 
 #include "jail.h"
-
-
-static void signal_handler(int signal) {
-    switch (signal) {
-    case SIGCHLD:
-        log_debug("got SIGCHLD, jail exited");
-        clean_jail(jail_config);
-        jail_conf_free(jail_config);
-        exit(EXIT_SUCCESS);
-    case SIGTERM:
-        log_info("got SIGTERM, clean jail");
-        kill(jail_config->pid, SIGKILL);
-        break;
-    case SIGINT:
-        log_info("got SIGINT, clean jail");
-        kill(jail_config->pid, SIGKILL);
-        break;
-    default:
-        // should not be here
-        log_error("got unexpected signal: %d, clean and exit", signal);
-        clean_jail(jail_config);
-        jail_conf_free(jail_config);
-        exit(EXIT_SUCCESS);
-    }
-}
 
 
 int main(int argc, char *argv[]) {
@@ -54,16 +28,13 @@ int main(int argc, char *argv[]) {
     log_debug("jail spawned");
     //jail_conf_dump(jail_config);
 
-    signal(SIGCHLD, signal_handler);
-    signal(SIGTERM, signal_handler);    // default kill
-    signal(SIGINT, signal_handler);     // Ctrl+C, default term
-    signal(SIGQUIT, signal_handler);    // Ctrl+\, default core
+    // start event loop
+    jail_loop();
 
-    // await events
-    for (;;);
-
+    goto free;
 error:
     log_error("something failed...");
+free:
     jail_conf_free(jail_config);
 
     return EXIT_FAILURE;

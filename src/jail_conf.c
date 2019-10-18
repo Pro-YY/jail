@@ -45,6 +45,7 @@ jail_conf_t *jail_conf_init(jail_args_t *args) {
 }
 
 void jail_conf_free(jail_conf_t *conf) {
+    log_debug("free config");
     if (conf->mount_dir) free(conf->mount_dir);
     if (conf) free(conf);
 }

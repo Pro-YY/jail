@@ -8,16 +8,49 @@
 #include "jail.h"
 
 /*
- * event loop: handling signal
+ * signal handling
  */
-// TODO seperate loop and signal handling
-void jail_loop() {
-
-    sigset_t mask;
-    int sfd;
+static int handle_signal_event(int sfd) {
     struct signalfd_siginfo fdsi;
-    ssize_t s;
+    ssize_t s = -1;
+    int ret = -1;   // 0 exit loop/process, -1 continue
+
+    s = read(sfd, &fdsi, sizeof(struct signalfd_siginfo));
+    if (s != sizeof(struct signalfd_siginfo)) {
+       log_errno("error read signalfd");
+       return ret;
+    }
+
+    switch (fdsi.ssi_signo) {
+    case SIGCHLD:
+        log_debug("Got SIGCHLD, jail exited");
+        clean_jail(jail_config);
+        ret = 0;
+        break;
+    case SIGTERM:
+        log_info("Got SIGTERM");
+        kill(jail_config->pid, SIGKILL);
+        break;
+    case SIGINT:
+        log_info("Got SIGINT");
+        kill(jail_config->pid, SIGKILL);
+        break;
+    case SIGQUIT:
+        log_info("Got SIGQUIT");
+        kill(jail_config->pid, SIGKILL);
+        break;
+    default:
+        log_error("Got unexpected signal: %d", fdsi.ssi_signo);
+    }
+
+    return ret;
+}
+
+
+static int register_signal_event(int epfd) {
     int ret = -1;
+    int sfd = -1;;
+    sigset_t mask;
 
     sigemptyset(&mask);
     sigaddset(&mask, SIGCHLD);
@@ -27,57 +60,59 @@ void jail_loop() {
     sigaddset(&mask, SIGUSR1);
     sigaddset(&mask, SIGUSR2);
 
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) == -1)
-        log_error("sigprocmask");
+    if (sigprocmask(SIG_BLOCK, &mask, NULL) == -1) {
+        log_errno("error sigprocmask");
+        return -1;
+    }
 
     sfd = signalfd(-1, &mask, SFD_NONBLOCK | SFD_CLOEXEC);
-    if (sfd == -1)
-        log_error("signalfd");
-
-    int epfd = -1;
-    epfd = epoll_create1(EPOLL_CLOEXEC);
-    if (epfd == -1) log_errno("error epoll create");
+    if (sfd == -1) {
+        log_errno("signalfd");
+        return -1;
+    }
 
     struct epoll_event event;
     event.data.fd = sfd;
     event.events = EPOLLIN | EPOLLET;
 
     ret = epoll_ctl(epfd, EPOLL_CTL_ADD, sfd, &event);
-    if (ret) { log_errno("error epoll_ctl"); }
+    if (ret) {
+        log_errno("error epoll_ctl");
+        close(sfd);
+        return -1;
+    }
 
+    return sfd;
+}
+
+
+/*
+ * event loop
+ */
+#define MAX_EVENTS_SIZE 1024
+
+
+int jail_loop() {
+    int epfd = -1, sfd = -1;
     int nfds = -1;
-    int i = -1;
-    int MAX_EVENTS_SIZE = 1024;
-    struct epoll_event events[1024];
+    struct epoll_event events[MAX_EVENTS_SIZE];
+    int ret = -1, i = -1;
+
+    epfd = epoll_create1(EPOLL_CLOEXEC);
+    if (epfd == -1) {
+        log_errno("error epoll create");
+        return -1;
+    }
+
+    sfd = register_signal_event(epfd);
 
     for (;;) {
         nfds = epoll_wait(epfd, events, MAX_EVENTS_SIZE, 1000);
         for (i = 0; i < nfds; i++) {
             if (events[i].events & EPOLLIN) {
                 if (events[i].data.fd == sfd) {
-                    s = read(sfd, &fdsi, sizeof(struct signalfd_siginfo));
-                    if (s != sizeof(struct signalfd_siginfo))
-                       log_errno("read");
-                    if (fdsi.ssi_signo == SIGCHLD) {
-                        log_debug("Got SIGCHLD, jail exited");
-                        clean_jail(jail_config);
-                        goto end;
-                    }
-                    else if (fdsi.ssi_signo == SIGTERM) {
-                        log_debug("Got SIGTERM");
-                        kill(jail_config->pid, SIGKILL);
-                    }
-                    else if (fdsi.ssi_signo == SIGINT) {
-                        log_debug("Got SIGINT");
-                        kill(jail_config->pid, SIGKILL);
-                    }
-                    else if (fdsi.ssi_signo == SIGQUIT) {
-                        log_debug("Got SIGQUIT");
-                        kill(jail_config->pid, SIGKILL);
-                    }
-                    else {
-                        log_info("Got unexpected signal: %d", fdsi.ssi_signo);
-                    }
+                    ret = handle_signal_event(sfd);
+                    if (ret == 0) goto end;
                 }
             }
         }
@@ -85,5 +120,5 @@ void jail_loop() {
 
 end:
     log_debug("event loop stopped");
-    return;
+    return 0;
 }

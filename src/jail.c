@@ -29,7 +29,8 @@ int main(int argc, char *argv[]) {
     //jail_conf_dump(jail_config);
 
     // start event loop
-    jail_loop();
+    ret = jail_loop();
+    if (ret) goto error;
 
     goto free;
 error:

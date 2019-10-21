@@ -66,6 +66,7 @@ void jail_conf_free(jail_conf_t *conf) {
 }
 
 void jail_conf_dump(jail_conf_t *conf) {
+#ifdef DEBUG
     if (LOG_VERBOSE < LOG_LEVEL_DEBUG) return;
     // TODO snprintf with log_debug
     fprintf(stderr, "[CONF DUMP BEGIN]\n");
@@ -89,4 +90,5 @@ void jail_conf_dump(jail_conf_t *conf) {
     fprintf(stderr, "writable: %d\n", conf->writable);
     fprintf(stderr, "ip_address: %s\n", conf->ip_address);
     fprintf(stderr, "[CONF DUMP END]\n");
+#endif
 }

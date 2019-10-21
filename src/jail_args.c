@@ -110,6 +110,7 @@ jail_args_t jail_args_parse(int argc, char **argv) {
 }
 
 void jail_args_dump(jail_args_t *ja) {
+#ifdef DEBUG
     if (LOG_VERBOSE < LOG_LEVEL_DEBUG) return;
     // TODO snprintf with log_debug
     fprintf(stderr, "[ARGS DUMP BEGIN]\n");
@@ -133,4 +134,5 @@ void jail_args_dump(jail_args_t *ja) {
     fprintf(stderr, "writable: %d\n", ja->writable);
     fprintf(stderr, "ip_address: %s\n", ja->ip_address);
     fprintf(stderr, "[ARGS DUMP END]\n");
+#endif
 }

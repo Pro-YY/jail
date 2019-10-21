@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     ret = spawn_jail(jail_config);
     if (ret < 0) goto error;
     log_debug("jail spawned");
-    jail_conf_dump(jail_config);
+    //jail_conf_dump(jail_config);
 
     // start event loop
     ret = jail_loop();

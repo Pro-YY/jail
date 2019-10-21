@@ -15,6 +15,7 @@ int LOG_VERBOSE;
 #define LOG_LEVEL_INFO  1
 #define LOG_LEVEL_DEBUG 2
 
+
 #define log_errno(...)                                              \
 do {                                                                \
     fprintf(stdout, "[ERROR]%s: %d: ", __FILE__, __LINE__);         \
@@ -23,12 +24,14 @@ do {                                                                \
     fprintf(stdout, "\n");                                          \
 } while (0)
 
+
 #define log_error(...)                                              \
 do {                                                                \
     fprintf(stdout, "[ERROR]%s: %d: ", __FILE__, __LINE__);         \
     fprintf(stdout, __VA_ARGS__);                                   \
     fprintf(stdout, "\n");                                          \
 } while (0)
+
 
 #define log_info(...)                                               \
 do {                                                                \
@@ -38,6 +41,8 @@ do {                                                                \
     fprintf(stdout, "\n");                                          \
 } while (0)
 
+
+#ifdef DEBUG
 #define log_debug(...)                                              \
 do {                                                                \
     if (!(LOG_VERBOSE >= LOG_LEVEL_DEBUG)) break;                   \
@@ -45,10 +50,12 @@ do {                                                                \
     fprintf(stdout, __VA_ARGS__);                                   \
     fprintf(stdout, "\n");                                          \
 } while (0)
+#else
+#define log_debug(...)
+#endif
 
 
 #define MAX_USER_DEFINED_ENV    16
-
 
 /*
  * jail args parse from command-line

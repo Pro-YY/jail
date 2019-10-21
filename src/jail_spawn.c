@@ -222,6 +222,13 @@ static int jail_process(void *args) {
         return ret;
     }
 
+    // filter syscalls
+    ret = jail_filter_syscalls(conf);
+    if (ret != 0) {
+        log_error("error filter syscalls");
+        return ret;
+    }
+
     log_debug("-------- Jail Start --------");
     ret = execve(jail_argv[0], jail_argv, conf->envp);
     if (ret != 0) {

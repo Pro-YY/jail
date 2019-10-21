@@ -16,6 +16,7 @@ static struct argp_option options[] = {
   { "base", 'b', "STRING", 0, "Mount base dir, default to '.'", 0 },
   { "root", 'r', "STRING", 0, "Rootfs, default to '/'", 0 },
   { "detach", 'd', 0, 0, "Detach process as deaemon", 0 },
+  { "env", 'e', "STRING", 0, "Environment variables", 0 },
   { "writable", 'w', 0, 0, "Make rootfs writable mount", 0 },
   { "verbose", 'v', 0, 0, "Make the operation more talkative", 0 },
   { "hint", -1, "STRING", OPTION_HIDDEN, "", 0 },
@@ -23,8 +24,11 @@ static struct argp_option options[] = {
   { 0 }
 };
 
+
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     jail_args_t *arguments = state->input;
+
+    static int envp_index = 0;
 
     switch (key) {
         case 'n':
@@ -38,6 +42,10 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
             break;
         case 'd':
             arguments->detach = 1;
+            break;
+        case 'e':
+            if (envp_index >= MAX_USER_DEFINED_ENV) break;
+            arguments->envp[envp_index++] = arg;
             break;
         case 'w':
             arguments->writable = 1;
@@ -79,10 +87,11 @@ static int jail_args_init(jail_args_t *args) {
     args->root = "/";
     args->detach = 0;
     args->writable = 0;
-    args->ip_address = "172.16.0.2";
+    args->ip_address = "172.17.0.1";
 
     args->program = NULL;
     args->args = NULL;
+    for (int i = 0; i < MAX_USER_DEFINED_ENV; i++) args->envp[i] = NULL;
 
     return 0;
 }
@@ -103,6 +112,11 @@ void jail_args_dump(jail_args_t *ja) {
     fprintf(stderr, "program: %s ", ja->program);
     for (int i = 0; ja->args[i]; i++) {
         fprintf(stderr, "%s ", ja->args[i]);
+    }
+    fprintf(stderr, "\n");
+    fprintf(stderr, "env:\n");
+    for (int i = 0; i < MAX_USER_DEFINED_ENV && ja->envp[i]; i++) {
+        fprintf(stderr, "%s ", ja->envp[i]);
     }
     fprintf(stderr, "\n");
     if (ja->hint) fprintf(stderr, "hint: %s\n", ja->hint);

@@ -47,6 +47,9 @@ do {                                                                \
 } while (0)
 
 
+#define MAX_USER_DEFINED_ENV    16
+
+
 /*
  * jail args parse from command-line
  */
@@ -56,6 +59,7 @@ typedef struct {
     char   *hint;
     char   *program;    // executable pragram to be run
     char  **args;       // and its args
+    char   *envp[MAX_USER_DEFINED_ENV];  // and its envs
     char   *base;
     char   *root;
     int     detach;
@@ -74,6 +78,7 @@ void jail_args_dump(jail_args_t *args);
 typedef struct {
     char   *program;
     char  **args;
+    char  **envp;
     char   *name;
     pid_t   pid;
     int     efd;

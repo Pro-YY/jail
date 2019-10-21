@@ -1,7 +1,7 @@
 all: jail-bin
 
 jail-bin: jail_args.o jail_conf.o jail_spawn.o jail_loop.o jail_seccomp.o jail_capability.o jail.o
-	gcc build/debug/obj/*.o -o build/debug/bin/jail-bin -lcap -lseccomp -lpthread
+	gcc build/debug/obj/*.o -o build/debug/bin/jail-bin -lcap -lseccomp
 
 jail.o: src/jail.c
 	gcc -Wall -c src/jail.c -o build/debug/obj/jail.o

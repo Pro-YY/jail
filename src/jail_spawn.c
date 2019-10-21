@@ -390,7 +390,7 @@ int clean_jail(jail_conf_t *conf) {
     log_debug("remove mount dir: %s ...", conf->mount_dir);
     ret = rmdir(conf->mount_dir);
     if (ret) log_errno("rmdir failed: %s", conf->mount_dir);
-    log_debug("cleaning completed.");
+    log_debug("cleaning completed");
 
     return ret;
 }

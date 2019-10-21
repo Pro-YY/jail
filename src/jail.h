@@ -106,4 +106,6 @@ int jail_loop();
 
 int jail_filter_syscalls(jail_conf_t *conf);
 
+int jail_drop_capabilities(jail_conf_t *conf);
+
 #endif /* _JAIL_H_INCLUDED_ */

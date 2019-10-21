@@ -229,6 +229,13 @@ static int jail_process(void *args) {
         return ret;
     }
 
+    // drop root capabilities
+    ret = jail_drop_capabilities(conf);
+    if (ret != 0) {
+        log_error("error drop capabilites");
+        return ret;
+    }
+
     log_debug("-------- Jail Start --------");
     ret = execve(jail_argv[0], jail_argv, conf->envp);
     if (ret != 0) {

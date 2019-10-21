@@ -17,6 +17,7 @@ static struct argp_option options[] = {
   { "root", 'r', "STRING", 0, "Rootfs, default to '/'", 0 },
   { "detach", 'd', 0, 0, "Detach process as deaemon", 0 },
   { "env", 'e', "STRING", 0, "Environment variables", 0 },
+  { "timeout", 't', "SECONDS", 0, "Running timeout", 0 },
   { "writable", 'w', 0, 0, "Make rootfs writable mount", 0 },
   { "verbose", 'v', 0, 0, "Make the operation more talkative", 0 },
   { "hint", -1, "STRING", OPTION_HIDDEN, "", 0 },
@@ -46,6 +47,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
         case 'e':
             if (envp_index >= MAX_USER_DEFINED_ENV) break;
             arguments->envp[envp_index++] = arg;
+            break;
+        case 't':
+            arguments->timeout = atoi(arg);
             break;
         case 'w':
             arguments->writable = 1;
@@ -86,6 +90,7 @@ static int jail_args_init(jail_args_t *args) {
     args->base = ".";
     args->root = "/";
     args->detach = 0;
+    args->timeout = -1;
     args->writable = 0;
     args->ip_address = "172.17.0.1";
 
@@ -124,6 +129,7 @@ void jail_args_dump(jail_args_t *ja) {
     fprintf(stderr, "base: %s\n", ja->base);
     fprintf(stderr, "root: %s\n", ja->root);
     fprintf(stderr, "detach: %d\n", ja->detach);
+    fprintf(stderr, "timeout: %d\n", ja->timeout);
     fprintf(stderr, "writable: %d\n", ja->writable);
     fprintf(stderr, "ip_address: %s\n", ja->ip_address);
     fprintf(stderr, "[ARGS DUMP END]\n");

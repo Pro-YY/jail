@@ -26,6 +26,7 @@ jail_conf_t *jail_conf_init(jail_args_t *args) {
     conf->name = args->name;
     conf->root = args->root;
     conf->detach = args->detach;
+    conf->timeout = args->timeout;
     conf->writable = args->writable;
     conf->ip_address = args->ip_address;
 
@@ -84,6 +85,7 @@ void jail_conf_dump(jail_conf_t *conf) {
     fprintf(stderr, "mount_dir: %s\n", conf->mount_dir);
     fprintf(stderr, "root: %s\n", conf->root);
     fprintf(stderr, "detach: %d\n", conf->detach);
+    fprintf(stderr, "timeout: %d\n", conf->timeout);
     fprintf(stderr, "writable: %d\n", conf->writable);
     fprintf(stderr, "ip_address: %s\n", conf->ip_address);
     fprintf(stderr, "[CONF DUMP END]\n");

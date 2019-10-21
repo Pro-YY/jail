@@ -63,6 +63,7 @@ typedef struct {
     char   *base;
     char   *root;
     int     detach;
+    int     timeout;
     int     writable;
     char   *ip_address;
 } jail_args_t;
@@ -85,6 +86,7 @@ typedef struct {
     char   *mount_dir;
     char   *root;
     int     detach;
+    int     timeout;
     int     writable;
     char   *ip_address;
 } jail_conf_t;

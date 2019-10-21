@@ -223,7 +223,11 @@ static int jail_process(void *args) {
     }
 
     log_debug("-------- Jail Start --------");
-    ret = execve(jail_argv[0], jail_argv, NULL);
+    char *envp[] = {
+        "PATH=/usr/local/node/bin:/usr/local/bin:/usr/bin:/bin",
+        "NODE_PATH=/usr/local/node/lib/node_modules"
+    };
+    ret = execve(jail_argv[0], jail_argv, envp);
     if (ret != 0) {
         log_errno("exec error!");
         return -1;

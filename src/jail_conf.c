@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "jail.h"
 
 
-#define MOUNT_DIR_SIZE 1024
+#define PROGRAM_PATH_SIZE   1024
+#define MOUNT_DIR_SIZE      1024
 
 
 jail_conf_t *jail_config; // global config
@@ -21,7 +23,20 @@ jail_conf_t *jail_conf_init(jail_args_t *args) {
     memset(conf, 0, sizeof(jail_conf_t));
 
     // from args
-    conf->program = args->program;
+    conf->program = malloc(PROGRAM_PATH_SIZE*sizeof(char));
+    if (!conf->program) {
+        log_errno("malloc failed");
+        return NULL;
+    }
+
+    memset(conf->program, 0, PROGRAM_PATH_SIZE);
+    if (args->program[0] != '/') {
+        // handle relative path
+        getcwd(conf->program, PROGRAM_PATH_SIZE);
+        strncat(conf->program, "/", PROGRAM_PATH_SIZE);
+    }
+    strncat(conf->program, args->program, PROGRAM_PATH_SIZE);
+
     conf->args = args->args;
     conf->name = args->name;
     conf->root = args->root;
@@ -60,6 +75,7 @@ jail_conf_t *jail_conf_init(jail_args_t *args) {
 
 void jail_conf_free(jail_conf_t *conf) {
     log_debug("free config");
+    if (conf->program) free(conf->program);
     if (conf->mount_dir) free(conf->mount_dir);
     if (conf->envp) free(conf->envp);
     if (conf) free(conf);

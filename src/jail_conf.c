@@ -1,15 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "jail.h"
 
 
 #define PROGRAM_PATH_SIZE   1024
 #define MOUNT_DIR_SIZE      1024
+#define MAX_NAME_SIZE       10  // limited by network device
 
 
 jail_conf_t *jail_config; // global config
+
+
+static char name[MAX_NAME_SIZE];
+
+
+static char *random_name() {
+    time_t t;
+    int i;
+    char table[] =  "abcdefghijklmnopqrstuvwxyz"
+                    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                    "0123456789_-"; // length 64
+
+    srand((unsigned) time(&t));
+    name[0] = 'j';
+    name[1] = '_';
+    for (i = 2; i < 10; i++) name[i] = table[rand()&63];
+
+    return name;
+}
 
 
 jail_conf_t *jail_conf_init(jail_args_t *args) {
@@ -38,7 +59,19 @@ jail_conf_t *jail_conf_init(jail_args_t *args) {
     strncat(conf->program, args->program, PROGRAM_PATH_SIZE);
 
     conf->args = args->args;
-    conf->name = args->name;
+
+    if (args->name) {
+        if (strlen(args->name) > MAX_NAME_SIZE) {
+            log_error("name is too long");
+            return NULL;
+        }
+        strncpy(name, args->name, MAX_NAME_SIZE);
+        conf->name = name;
+    }
+    else {
+        conf->name = random_name();
+    }
+
     conf->root = args->root;
     conf->detach = args->detach;
     conf->timeout = args->timeout;

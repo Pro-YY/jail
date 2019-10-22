@@ -12,8 +12,8 @@ static char doc[] = "Jail, a pretty sandbox to run program.";
 static char args_doc[] = "[<program> [<argument>...]]";
 
 static struct argp_option options[] = {
-  { "name", 'n', "STRING", 0, "Jail name", 0 },
-  { "base", 'b', "STRING", 0, "Mount base dir, default to '.'", 0 },
+  { "name", 'n', "STRING", 0, "Jail name, default to random string", 0 },
+  { "base", 'b', "STRING", 0, "Mount base dir, default to '/tmp'", 0 },
   { "root", 'r', "STRING", 0, "Rootfs, default to '/'", 0 },
   { "detach", 'd', 0, 0, "Detach process as deaemon", 0 },
   { "env", 'e', "STRING", 0, "Environment variables", 0 },
@@ -83,11 +83,12 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 
 static struct argp argp = { options, parse_opt, args_doc, doc };
 
+
 static int jail_args_init(jail_args_t *args) {
-    args->name = "demo-1"; // length should be no more than 10
+    args->name = NULL;
     args->verbose = 0;
     args->hint = NULL;
-    args->base = ".";
+    args->base = "/tmp";
     args->root = "/";
     args->detach = 0;
     args->timeout = -1;

@@ -249,6 +249,11 @@ static int jail_process(void *args) {
 /*
  * main process
  */
+int check_root() {
+    return getuid();
+}
+
+
 int daemonize() {
     int ret = -1;
     int fd;

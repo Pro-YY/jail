@@ -107,6 +107,7 @@ void jail_conf_free(jail_conf_t *conf);
 void jail_conf_dump(jail_conf_t *conf);
 
 
+int check_root();
 int daemonize();
 int spawn_jail(jail_conf_t *conf);
 int clean_jail(jail_conf_t *conf);

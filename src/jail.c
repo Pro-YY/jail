@@ -3,13 +3,17 @@
 
 #include "jail.h"
 
-
 int main(int argc, char *argv[]) {
     int ret = -1;
 
     jail_args_t args = jail_args_parse(argc, argv);
     LOG_VERBOSE = args.verbose;
     //jail_args_dump(&args);
+
+    if (check_root()) {
+        log_info("You should be root, quit.");
+        return EXIT_FAILURE;
+    }
 
     jail_config = jail_conf_init(&args);
     if (!jail_config) {

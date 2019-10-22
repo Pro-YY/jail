@@ -104,6 +104,7 @@ static int handle_timer_event(int tfd) {
         return -1;
     }
     */
+    close(tfd);
 
     return 0;
 }

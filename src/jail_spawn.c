@@ -123,7 +123,7 @@ static int setup_network(jail_conf_t *conf) {
     if (ret) { log_error("error set bridge up"); goto error; }
 
 create_veth:
-    sprintf(cmd, "ip link add veth-%s type veth peer name veth0 netns %d", conf->name, conf->pid);
+    sprintf(cmd, "ip link add veth-%s type veth peer name eth0 netns %d", conf->name, conf->pid);
     ret = system(cmd);
     if (ret) { log_error("error add link"); return -1; }
 
@@ -159,10 +159,10 @@ static int init_jail_network(jail_conf_t *conf) {
     ret = system("ip link set lo up");
     if (ret) { log_error("error set lo up"); return -1; }
 
-    ret = system("ip link set veth0 up");
-    if (ret) { log_error("error set veth0 up"); return -1; }
+    ret = system("ip link set eth0 up");
+    if (ret) { log_error("error set eth0 up"); return -1; }
 
-    sprintf(cmd, "ip address add %s dev veth0", address);
+    sprintf(cmd, "ip address add %s dev eth0", address);
     ret = system(cmd);
     if (ret) { log_error("error add address"); return -1; }
 
@@ -178,7 +178,7 @@ static int init_jail_network(jail_conf_t *conf) {
  * jail process as child routine
  */
 #define MAX_ARGV 1024
-#define HOSTNAME_PREFIX "jail-"
+#define HOSTNAME_PREFIX ""
 #define MAX_HOSTNAME 256
 
 

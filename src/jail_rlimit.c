@@ -16,6 +16,7 @@ int jail_setup_rlimits(jail_conf_t *conf) {
 		return -1;
 	}
 
+    /*
 	ret = setrlimit(RLIMIT_NOFILE,
         & (struct rlimit) {
 		.rlim_max = RLIM_INFINITY,
@@ -25,6 +26,7 @@ int jail_setup_rlimits(jail_conf_t *conf) {
 		log_errno("error setrlimit file");
 		return -1;
 	}
+    */
 
 	return 0;
 }

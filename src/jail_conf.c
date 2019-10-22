@@ -96,7 +96,8 @@ jail_conf_t *jail_conf_init(jail_args_t *args) {
         log_errno("malloc failed");
         return NULL;
     }
-    conf->envp[0] = "PATH=/usr/local/node/bin:/usr/local/bin:/usr/bin:/bin";
+    conf->envp[0] = "PATH=/usr/local/node/bin"
+                    ":/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
     conf->envp[1] = "NODE_PATH=/usr/local/node/lib/node_modules";
     for (int i = 0; i < MAX_USER_DEFINED_ENV && args->envp[i]; i++) {
         conf->envp[i+2] = args->envp[i];

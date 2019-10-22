@@ -14,7 +14,7 @@
 #define FD_COUNT 64
 */
 #define CPU_CFS_PERIOD_US       "1000000"
-#define CPU_CFS_QUOTA_US        "100000"
+#define CPU_CFS_QUOTA_US        "1000000"
 
 
 struct cgrp_control {

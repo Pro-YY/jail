@@ -309,6 +309,12 @@ int spawn_jail(jail_conf_t *conf) {
         return -1;
     }
 
+    ret = jail_setup_rlimits(conf);
+    if (ret < 0) {
+        log_error("error setup rlimits");
+        return -1;
+    }
+
     flags = SIGCHLD | CLONE_NEWNS |
         CLONE_NEWUTS | CLONE_NEWIPC | CLONE_NEWPID | CLONE_NEWNET |
         CLONE_NEWCGROUP;

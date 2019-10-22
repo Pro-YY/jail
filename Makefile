@@ -4,7 +4,7 @@ CFLAGS=-g -Wall -DDEBUG
 
 all: jail
 
-jail: jail_args.o jail_conf.o jail_spawn.o jail_loop.o jail_seccomp.o jail_capability.o jail_cgroup.o jail.o
+jail: jail_args.o jail_conf.o jail_spawn.o jail_loop.o jail_seccomp.o jail_capability.o jail_cgroup.o jail_rlimit.o jail.o
 	$(CC) build/debug/obj/*.o -o build/debug/bin/jail -lcap -lseccomp
 
 jail.o: src/jail.c
@@ -31,6 +31,8 @@ jail_capability.o: src/jail_capability.c
 jail_cgroup.o: src/jail_cgroup.c
 	$(CC) $(CFLAGS) -c src/jail_cgroup.c -o build/debug/obj/jail_cgroup.o
 
+jail_rlimit.o: src/jail_rlimit.c
+	$(CC) $(CFLAGS) -c src/jail_rlimit.c -o build/debug/obj/jail_rlimit.o
 .PHONY: clean
 
 clean:

@@ -120,4 +120,6 @@ int jail_drop_capabilities(jail_conf_t *conf);
 int jail_setup_cgroups(jail_conf_t *conf);
 int jail_clean_cgroups(jail_conf_t *conf);
 
+int jail_setup_rlimits(jail_conf_t *conf);
+
 #endif /* _JAIL_H_INCLUDED_ */

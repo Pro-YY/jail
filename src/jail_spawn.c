@@ -302,6 +302,13 @@ int spawn_jail(jail_conf_t *conf) {
         return -1;
     }
 
+    // setup resource limit, cgroups, rlimit...
+    ret = jail_setup_cgroups(conf);
+    if (ret < 0) {
+        log_error("error setup cgroups");
+        return -1;
+    }
+
     flags = SIGCHLD | CLONE_NEWNS |
         CLONE_NEWUTS | CLONE_NEWIPC | CLONE_NEWPID | CLONE_NEWNET |
         CLONE_NEWCGROUP;
@@ -321,7 +328,7 @@ int spawn_jail(jail_conf_t *conf) {
     }
     conf->pid = ret;
 
-    // setup something here, like network/uidmap
+    // setup something here, like network/uidmap?
     ret = setup_network(conf);
     if (ret < 0) {
         log_error("error setup network, killing jail process");
@@ -384,6 +391,10 @@ int clean_jail(jail_conf_t *conf) {
     log_debug("-------- Jail Exit ---------");
 
     log_debug("clean jail process resource...");
+
+    ret = jail_clean_cgroups(conf);
+    if (ret) log_error("clean cgroups failed");
+
     close(conf->efd);
     if (jail_stack) free(jail_stack);
 

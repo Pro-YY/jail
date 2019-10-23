@@ -34,7 +34,7 @@ make release
 
 customized rootfs
 
-specify ip address
+customized ip address
 
 customized base dir
 

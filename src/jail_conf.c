@@ -53,7 +53,7 @@ jail_conf_t *jail_conf_init(jail_args_t *args) {
     memset(conf->program, 0, PROGRAM_PATH_SIZE);
     if (args->program[0] != '/') {
         // handle relative path
-        getcwd(conf->program, PROGRAM_PATH_SIZE);
+        conf->program = getcwd(conf->program, PROGRAM_PATH_SIZE);
         strncat(conf->program, "/", PROGRAM_PATH_SIZE);
     }
     strncat(conf->program, args->program, PROGRAM_PATH_SIZE);

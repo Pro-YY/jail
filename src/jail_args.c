@@ -5,7 +5,7 @@
 
 const char *argp_program_version = "jail 1.0.0";
 
-const char *argp_program_bug_address = "<brookeyang@tencent.com>";
+const char *argp_program_bug_address = "<brookeyang@vip.qq.com>";
 
 static char doc[] = "Jail, a pretty sandbox to run program.";
 
@@ -113,7 +113,6 @@ jail_args_t jail_args_parse(int argc, char **argv) {
 void jail_args_dump(jail_args_t *ja) {
 #ifdef DEBUG
     if (LOG_VERBOSE < LOG_LEVEL_DEBUG) return;
-    // TODO snprintf with log_debug
     fprintf(stderr, "[ARGS DUMP BEGIN]\n");
     fprintf(stderr, "verbose: %d\n", ja->verbose);
     fprintf(stderr, "program: %s ", ja->program);

@@ -16,6 +16,8 @@ int LOG_VERBOSE;
 #define LOG_LEVEL_DEBUG 2
 
 
+#ifdef DEBUG
+
 #define log_errno(...)                                              \
 do {                                                                \
     fprintf(stdout, "[ERROR]%s: %d: ", __FILE__, __LINE__);         \
@@ -31,6 +33,25 @@ do {                                                                \
     fprintf(stdout, __VA_ARGS__);                                   \
     fprintf(stdout, "\n");                                          \
 } while (0)
+
+#else
+
+#define log_errno(...)                                              \
+do {                                                                \
+    fprintf(stdout, "[ERROR] ");                                    \
+    fprintf(stdout, __VA_ARGS__);                                   \
+    fprintf(stdout, "\n");                                          \
+} while (0)
+
+
+#define log_error(...)                                              \
+do {                                                                \
+    fprintf(stdout, "[ERROR] ");                                    \
+    fprintf(stdout, __VA_ARGS__);                                   \
+    fprintf(stdout, "\n");                                          \
+} while (0)
+
+#endif
 
 
 #define log_info(...)                                               \

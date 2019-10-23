@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     //jail_args_dump(&args);
 
     if (check_root()) {
-        log_info("You should be root, quit.");
+        log_error("You should be root, quit.");
         return EXIT_FAILURE;
     }
 

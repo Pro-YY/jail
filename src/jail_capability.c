@@ -5,8 +5,10 @@
 
 
 static int drop_caps[] = {
+    /*
     CAP_MKNOD,  // prohibits `mknod`
     CAP_NET_RAW, // prohibits `ping`
+    */
 };
 
 

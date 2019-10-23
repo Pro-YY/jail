@@ -4,9 +4,11 @@
 
 
 static int syscall_blacklist[] = {
+    /*
     SCMP_SYS(fchmodat),
     SCMP_SYS(fchmod),
     SCMP_SYS(chmod),
+    */
 };
 
 

@@ -268,6 +268,12 @@ int daemonize() {
     ret = fork();
     if (ret) _exit(EXIT_SUCCESS);
 
+    ret = umask(0);
+    if (ret < 0) { log_errno("error umask"); return -1; }
+
+    ret = chdir("/");
+    if (ret < 0) { log_errno("error chdir"); return -1; }
+
     for (fd = 0; fd < maxfd; fd++) close(fd);
     fd = open("/dev/null", O_RDWR);
     if (fd < 0) { log_errno("error open /dev/null as stdin"); return -1; }
